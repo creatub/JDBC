@@ -3,6 +3,7 @@ import javax.swing.*;
 import javax.swing.border.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.ArrayList;
 /*디자인 패턴
  * - MVC 패턴
  * 	- M: Model - 데이터를 가지는 부분 XXDAO, XXVO ==> Data layer
@@ -255,12 +256,22 @@ public class MyBoardApp extends JFrame{ // View
 		//생성자에 this가 없으면 에러남
 		handler = new MyEventHandler(this); // this를 넘겨줘야 핸들러를 연동할 수 있음 
 		//이벤트 소스와 연결
+		btLogin.addActionListener(handler);
 		btJoin.addActionListener(handler); // MyEventHandler에서 implements ActionListener하면 에러 없어짐
 		btList.addActionListener(handler);
 		btDel.addActionListener(handler);
 		btClear.addActionListener(handler);
+		
 		bbsWrite.addActionListener(handler);
+		bbsList.addActionListener(handler);
+		bbsDel.addActionListener(handler);
+		bbsFind.addActionListener(handler);
 		tabbedPane.addChangeListener(handler);
+		
+		//초기에 글쓰기 탭은 비활성화 ==> 로그인해야 활성화
+		setEnableBBS(false);
+//		tabbedPane.setEnabledAt(2, false); // 글쓰기
+//		tabbedPane.setEnabledAt(3, false); // 글목록
 		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setSize(400,700);
@@ -281,7 +292,36 @@ public class MyBoardApp extends JFrame{ // View
 		this.taMembers.setText("");
 		this.tfId.requestFocus();
 	}//clear1------
+	
+	public void clear2() {
+		this.tfTitle.setText("");
+		this.taContent.setText("");		
+	}
 	public void showMsg(String msg) {
 		JOptionPane.showMessageDialog(this, msg);
-	}
+	}//showMsg()-------
+
+	public void showMembers(ArrayList<MemberVO> userList) {
+		if(userList==null) return;
+		if(userList.size()==0) {
+			taMembers.setText("등록된 회원은 없습니다");
+			return;
+		}
+		taMembers.setText("");
+		taMembers.append("===========================================================\n");
+		taMembers.append("ID\tName\tTel\t\tIndate\n");
+		taMembers.append("===========================================================\n");
+		for(MemberVO user:userList) {
+			taMembers.append(user.getId()+"\t"+user.getName()+"\t");
+			taMembers.append(user.getTel()+"\t\t"+user.getIndate()+"\n");
+		}
+		taMembers.append("===========================================================\n");
+	}//showMembers()-----------------
+
+	public void setEnableBBS(boolean b) {
+		tabbedPane.setEnabledAt(2, b); // 글쓰기
+		tabbedPane.setEnabledAt(3, b); // 글목록
+	}//setEnableBBS()------------------
+
+	
 }
