@@ -40,7 +40,72 @@ public class BbsDAO {
 		}finally {
 			close();
 		}
+	}
+	/**게시판 목록 가져오기 - R (SELECT) => 다중행을 반환하는 경우*/
+	public ArrayList<BbsVO> selectAll() throws SQLException{
+		try {
+			con=DBUtil.getCon();
+			String sql = "SELECT * FROM bbs ORDER BY no";
+			ps=con.prepareStatement(sql);
+			rs=ps.executeQuery();
+			
+			return makeList(rs);
+		}finally {
+			close();
+		}
+	}//---------------------------
+	/**게시판 글 검색 - column값이 [text를 포함 / text인 글] 찾기*/
+	public ArrayList<BbsVO> findByText(String col, String text) throws SQLException{
+		try {
+			con=DBUtil.getCon();
+			String sql;
+	        if ("title".equals(col)) {
+	            sql = "SELECT * FROM bbs WHERE title LIKE ? ORDER BY no";
+	            text = '%'+text+'%';
+	        } else if ("writer".equals(col)) {
+	            sql = "SELECT * FROM bbs WHERE writer LIKE ? ORDER BY no";
+	        } else {
+	            // 예외 처리: 유효하지 않은 컬럼명
+	            throw new IllegalArgumentException("유효하지 않은 컬럼명입니다: " + col);
+	        }
+			ps=con.prepareStatement(sql);			
+			ps.setString(1, text);
+			rs=ps.executeQuery();
+			
+			return makeList(rs);
+		}finally {
+			close();
+		}
+	}//---------------------------
+	/**게시판 글 삭제 - D (Delete)*/
+	public int deleteBbs(String num) throws SQLException{
+		try {
+			con = DBUtil.getCon();
+			String sql = "DELETE FROM BBS WHERE no = ?";
+			ps = con.prepareStatement(sql);
+			ps.setString(1, num);
+			
+			int n = ps.executeUpdate();
+			return n;
+		}finally {
+			close();
+		}
 		
+		
+	}
+
+	private ArrayList<BbsVO> makeList(ResultSet rs) throws SQLException {
+		ArrayList<BbsVO> arr = new ArrayList<>();
+		while(rs.next()) {
+			int no = rs.getInt("no");
+			String title = rs.getString("title");
+			String writer = rs.getString("writer");
+			String content = rs.getString("content");
+			java.sql.Date wdate = rs.getDate("wdate");
+			BbsVO record = new BbsVO(no,title,writer,content,wdate);
+			arr.add(record);
+		}//---while
+		return arr;
 	}
 	
 	public void close() {

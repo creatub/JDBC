@@ -10,18 +10,25 @@ import javax.swing.event.*;
 public class MyEventHandler implements ActionListener, ChangeListener{
 
 	private MyBoardApp gui;//View
+	private DialogFrame dialog;
 	private MemberDAO userDAO;//Model
-	private BbsDAO bbsDao;//Model
+	private BbsDAO bbsDAO;//Model
 	
 	public MyEventHandler(MyBoardApp app) {
 		this.gui = app;
 		userDAO = new MemberDAO();
-		bbsDao = new BbsDAO();
+		bbsDAO = new BbsDAO();
+	}
+	public MyEventHandler(DialogFrame app) {
+		this.dialog = app;
+		userDAO = new MemberDAO();
+		bbsDAO = new BbsDAO();
 	}
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		Object obj = e.getSource();
+		System.out.println(obj);
 		if(obj == gui.btLogin) {//로그인
 			login();
 		}else if(obj == gui.btJoin) {//회원가입
@@ -35,25 +42,33 @@ public class MyEventHandler implements ActionListener, ChangeListener{
 		}else if(obj == gui.bbsWrite) { // 게시판 글쓰기
 			writeBBS();
 		}else if(obj == gui.bbsList) { // 게시판 글목록
-			
+//			listBBS();
+			gui.tabbedPane.setSelectedIndex(3);
 		}else if(obj == gui.bbsDel) { // 게시글 삭제
-			
+			deleteBBS();
 		}else if(obj == gui.bbsFind) {
 			//title로 검색
+			findBBS();
+		}else if(obj == dialog.okButton) {
+			executeDelete();
 		}
 	}//--------------------------------------
-	
+
+
+
 	@Override
 	public void stateChanged(ChangeEvent e) {
 		int selectedIndex = gui.tabbedPane.getSelectedIndex();
 		if(selectedIndex==2) {
 			try {
-				int no = bbsDao.callBbsNo();
+				int no = bbsDAO.callBbsNo();
 				gui.tfNo.setText(" "+Integer.toString(no)+"번글");
 				gui.tfNo.setEnabled(false);
 			} catch (SQLException e1) {
 				e1.printStackTrace();
 			}
+		}else if(selectedIndex==3) {
+			listBBS();
 		}
 	}
 	private void login() {
@@ -180,16 +195,16 @@ public class MyEventHandler implements ActionListener, ChangeListener{
 			gui.showMsg("글 내용을 입력해주세요");
 		}else {
 			//3.입력값을 BbsVO에 담아주기
-			BbsVO bbs = new BbsVO(title, writer, content, null);
+			BbsVO bbs = new BbsVO(0, title, writer, content, null);
 			//4.bbsDao의 insertBbs()호출
 			try {
-				int n = bbsDao.insertBbs(bbs);
+				int n = bbsDAO.insertBbs(bbs);
 				//5.결과에 따른 메시지 처리
 				String msg = (n>0)?"게시물이 업로드 되었습니다.":"게시물 등록에 실패했습니다.";
 				gui.showMsg(msg);
 				if(n>0) {
 					gui.clear2();
-					int no  = bbsDao.callBbsNo();
+					int no  = bbsDAO.callBbsNo();
 					gui.tfNo.setText(" "+Integer.toString(no)+"번글");
 					gui.tabbedPane.setSelectedIndex(3);
 				}
@@ -197,13 +212,75 @@ public class MyEventHandler implements ActionListener, ChangeListener{
 				// TODO Auto-generated catch block
 				gui.showMsg("게시판 업로드에 실패했습니다.");
 				e.printStackTrace();
+			}	
+		}		
+	}//writeBBS()-----------------
+	private void listBBS() {
+		//userDao의 selectAll()호출
+			try {
+				ArrayList<BbsVO> userList=bbsDAO.selectAll();
+				//반환 받은 ArrayList에서 회원정보 꺼내서 taMembers에 출력
+				gui.showBbs(userList);
+			}catch(SQLException e) {
+				gui.showMsg(e.getMessage());
 			}
-			
-		}
 		
+	}//listBBS()---------------
+	
+	private void findBBS() {
+		//입력값 받기
+		String title = gui.tfTitle.getText();
+		if(title==null||title.trim().isEmpty()) {
+			gui.showMsg("검색할 글 제목을 입력해주세요");
+		}else {
+			//userDao의 findByText()호출
+			try {
+				ArrayList<BbsVO> userList=bbsDAO.findByText("title",title.trim());
+				gui.tfTitle.setText("");
+				gui.tabbedPane.setSelectedIndex(3);
+				//반환 받은 ArrayList에서 회원정보 꺼내서 taMembers에 출력
+				gui.showBbs(userList);
+				String str = "[" + title + "] 키워드로 총 "+userList.size()+"개의 결과를 찾았습니다.";
+				gui.showMsg(str);
+			}catch(SQLException e) {
+				gui.showMsg(e.getMessage());
+			}
+		}
+	}//findBBS()--------------
+	private void deleteBBS() {
+		String writer = gui.tfWriter.getText();
+		if(writer==null||writer.trim().isEmpty()) {
+			gui.showMsg("관리자에게 문의하세요.");
+		}else {
+			gui.dialogFrame.setVisible(true);
+			try {
+				ArrayList<BbsVO> userList=bbsDAO.findByText("writer",writer);
+				gui.dialogFrame.setText(userList);
+
+			}catch(SQLException e) {
+				gui.showMsg(e.getMessage());
+			}
+		}
 		
 	}
 	
+	private void executeDelete() {
+		String selectedValue = (String) dialog.comboBox.getSelectedItem();
+		try {
+			int n = bbsDAO.deleteBbs(selectedValue);
+			System.out.println(n);
+			//5.결과에 따른 메시지 처리
+			String msg = (n>0)?selectedValue+"번 게시물이 삭제 되었습니다.":"게시물 삭제에 실패했습니다.";
+			gui.showMsg(msg);
+			if(n>0) {
+				gui.clear2();
+				gui.tabbedPane.setSelectedIndex(3);
+			}
+		} catch (SQLException e) {
+			gui.showMsg("게시판 글 삭제에 실패했습니다.");
+			e.printStackTrace();
+		}	
+	}
 	
 	
 }////////////////////////////////////////

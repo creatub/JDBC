@@ -1,6 +1,7 @@
 package jdbc.bbs;
 import javax.swing.*;
 import javax.swing.border.*;
+
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
@@ -30,11 +31,15 @@ public class MyBoardApp extends JFrame{ // View
 	JButton bbsWrite, bbsDel, bbsFind, bbsList;
 	JTextArea taMembers, taList, taContent;
 	JTabbedPane tabbedPane;
+	DialogFrame dialogFrame;
 	
 	MyEventHandler handler; // Controller
 	
 	public MyBoardApp() {
 		super("::MyBoardApp::");
+		
+		dialogFrame = new DialogFrame(this);
+		dialogFrame.setBounds(100, 200, 500, 200);
 		
 		JPanel panel_1 = new JPanel();
 		getContentPane().add(panel_1, "Center");
@@ -323,5 +328,97 @@ public class MyBoardApp extends JFrame{ // View
 		tabbedPane.setEnabledAt(3, b); // 글목록
 	}//setEnableBBS()------------------
 
-	
+	public void showBbs(ArrayList<BbsVO> userList) {
+		if(userList==null) return;
+		if(userList.size()==0) {
+			taList.setText("등록된 게시글이 없습니다");
+			return;
+		}
+		taList.setFont(new java.awt.Font(Font.MONOSPACED, Font.PLAIN, 12));
+		taList.setText("");
+		taList.append("==========================================================================================\n");
+		taList.append(String.format("%-4s%-20s\t%-10s", "No", "Title", "Writer"));
+		taList.append(String.format("%-30s", "Content"));
+		taList.append("\tWdate\n");
+		taList.append("==========================================================================================\n");
+		for(BbsVO user:userList) {
+//			taList.append(user.getNo()+"\t"+user.getTitle()+"\t\t");
+//			taList.append(user.getWriter()+"\t"+user.getContent()+"\t\t");
+//			taList.append(user.getWdate()+"\n");
+			taList.append(String.format("%-4s%-20s\t%-10s%-30s\t", user.getNo(), user.getTitle(), user.getWriter(), user.getContent()));
+			taList.append(user.getWdate()+"\n");
+		}
+		taList.append("==========================================================================================\n");
+		
+	}
 }
+
+class DialogFrame extends JDialog {
+    JTextArea textArea;
+    JComboBox<Integer> comboBox; // 새로 추가된 콤보박스
+    JButton okButton;
+    MyEventHandler handler;
+    public DialogFrame(MyBoardApp app) {
+        setTitle("삭제할 글을 선택해주세요");
+        setSize(300, 200);
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+
+        // 다이얼로그에 포함될 컴포넌트들을 추가합니다.
+        textArea = new JTextArea();
+        JScrollPane scrollPane = new JScrollPane(textArea);
+
+        // 라벨 초기화
+        JLabel lblNewLabel= new JLabel("삭제할 글 번호를 고르세요 >>>");
+		
+        // 콤보박스 초기화
+        comboBox = new JComboBox<>();
+
+        // 확인 버튼
+        okButton = new JButton("확인");
+        handler = new MyEventHandler(this);
+        okButton.addActionListener(handler);
+
+        JButton closeButton = new JButton("닫기");
+        closeButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                dispose(); // 프레임을 닫음
+            }
+        });
+        // 레이아웃 설정
+        setLayout(new BorderLayout());
+        add(scrollPane, BorderLayout.CENTER);
+        
+        // 콤보박스와 버튼을 담을 패널 추가
+        JPanel panel = new JPanel();
+        panel.add(lblNewLabel);
+        panel.add(comboBox);
+        panel.add(okButton);
+        panel.add(closeButton);
+        add(panel, BorderLayout.SOUTH);
+
+        setLocationRelativeTo(app);
+    }
+
+	public void setText(ArrayList<BbsVO> userList) {
+		if(userList==null) return;
+		if(userList.size()==0) {
+			textArea.setText("등록된 게시글이 없습니다");
+			return;
+		}
+		textArea.setFont(new java.awt.Font(Font.MONOSPACED, Font.PLAIN, 12));
+		textArea.setText("");
+		textArea.append("==========================================================================================\n");
+		textArea.append(String.format("%-4s%-20s\t%-10s", "No", "Title", "Writer"));
+		textArea.append(String.format("%-30s", "Content"));
+		textArea.append("\tWdate\n");
+		textArea.append("==========================================================================================\n");
+		for(BbsVO user:userList) {
+			textArea.append(String.format("%-4s%-20s\t%-10s%-30s\t", user.getNo(), user.getTitle(), user.getWriter(), user.getContent()));
+			textArea.append(user.getWdate()+"\n");
+			comboBox.addItem(user.getNo());
+		}
+		textArea.append("==========================================================================================\n");
+		
+	}// setText()-------------
+
+}//--------------------------------------

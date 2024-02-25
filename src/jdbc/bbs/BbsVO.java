@@ -3,7 +3,7 @@ import java.sql.*;
 //게시판과 관련된 도메인 객체
 public class BbsVO {
 	
-//	private int no; // 현업에서는 String으로 많이 함
+	private int no; // 현업에서는 String으로 많이 함
 	private String title;
 	private String writer;
 	private String content;
@@ -12,20 +12,20 @@ public class BbsVO {
 		super();
 		// TODO Auto-generated constructor stub
 	}
-	public BbsVO(/*int no,*/ String title, String writer, String content, Date wdate) {
+	public BbsVO(int no, String title, String writer, String content, Date wdate) {
 		super();
-//		this.no = no;
+		this.no = no;
 		this.title = title;
 		this.writer = writer;
 		this.content = content;
 		this.wdate = wdate;
 	}
-//	public int getNo() {
-//		return no;
-//	}
-//	public void setNo(int no) {
-//		this.no = no;
-//	}
+	public int getNo() {
+		return no;
+	}
+	public void setNo(int no) {
+		this.no = no;
+	}
 	public String getTitle() {
 		return title;
 	}
