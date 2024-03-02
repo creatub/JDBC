@@ -105,6 +105,7 @@ public class BbsDAO {
 			BbsVO record = new BbsVO(no,title,writer,content,wdate);
 			arr.add(record);
 		}//---while
+		
 		return arr;
 	}
 	

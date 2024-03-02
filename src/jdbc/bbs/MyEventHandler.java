@@ -97,6 +97,30 @@ public class MyEventHandler implements ActionListener, ChangeListener{
 				e.printStackTrace();
 			}
 		}
+//		// 강사님이 수업시간에 짜주신 버전
+//		//id, pw값 받기
+//		String id = gui.loginId.getText();
+//		char[] ch = gui.loginPwd.getPassword();
+//		String pw = new String(ch);
+//		//유효성 체크
+//		if(id==null||ch==null||id.trim().isEmpty()||pw.trim().isEmpty()){
+//			gui.showMsg("로그인 아이디와 비밀번호를 입력하세요");
+//			gui.loginId.requestFocus();
+//			return;
+//		}
+//		try {
+//			//userDao의 loginCheck(id,pw)호출
+//			int result = userDAO.loginCheck(id, pw);
+//			if(result>0) {
+//				gui.showMsg(id+"님 환영합니다");
+//				gui.tabbedPane.setEnabledAt(2, true);
+//				gui.tabbedPane.setEnabledAt(3, true);
+//				gui.setTitle(id+"님 로그인 중...");
+//				
+//			}
+//		}catch(SQLException e) {
+//			gui.showMsg(e.getMessage());
+//		}
 	}
 
 	private void joinMember() {

@@ -50,6 +50,11 @@ public class BbsVO {
 	public void setWdate(Date wdate) {
 		this.wdate = wdate;
 	}
+	@Override
+	public String toString() {
+		return "BbsVO [no=" + no + ", title=" + title + ", writer=" + writer + ", content=" + content + ", wdate="
+				+ wdate + "]";
+	}
 	
 	
 	
